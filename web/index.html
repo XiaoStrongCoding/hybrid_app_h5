@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            font-size: 50px;
+        }
+    </style>
+    <script>
+        let i = 1
+        const callbackMap = {}
+        window.JSSDK = {
+            getWebEditTextValue(callbackId){
+                const editText = document.getElementById('editText')
+                const text = editText.value
+                nativeBridge.receiveMessage(callbackId, text)
+            },
+            getNativeEditTextValue(callback){
+                const callbackId = i++
+                callbackMap[callbackId] = callback
+                nativeBridge.getNativeEditTextValue(callbackId)
+            },
+            receiveMessage(callbackId, value){
+                if(callbackMap[callbackId]){
+                    callbackMap[callbackId](value)
+                }
+            }
+        }
+        window.showWebDialog = function(text){
+            alert(text)
+        }
+        document.addEventListener('DOMContentLoaded', function(){
+            const editText = document.getElementById('editText')
+            const showBtn = document.getElementById('showBtn')
+            showBtn.addEventListener('click', function(e){
+                const text = editText.value
+                showNativeDialog(text)
+            })
+            const showBtn2 = document.getElementById('showBtn2')
+            showBtn2.addEventListener('click', function(e){
+                window.JSSDK.getNativeEditTextValue(text=>window.alert(text))
+            })
+        })
+        function showNativeDialog(text){
+            // window.alert('jsBridge://showNativeDialog?text='+text)
+            nativeBridge.showNativeDialog(text)
+        }
+    </script>
+</head>
+<body>
+    <div>
+        <input type='text' id='editText' placeholder="输入内容"/>
+    </div>
+    <div>
+        <button id='showBtn'>显示Native弹窗</button>
+    </div>
+    <div>
+        <button id='showBtn2'>获取Native内容</button>
+    </div>
+</body>
+</html>
